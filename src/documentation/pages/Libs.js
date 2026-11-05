@@ -219,7 +219,7 @@ export default class Libs extends Component {
                     </Container>
                     <Container id="React-Maskedinput" className="my-4">
                         <h3>React-maskedinput</h3>
-                        <p>A React component for <code>&lt;input></code> masking, built on top of inputmask-core.</p>
+                        <p>A React component for <code>&lt;input&gt;</code> masking, built on top of inputmask-core.</p>
                         <div style={{width: '200px'}}>
                             <MaskedInput mask="1111 1111 1111 1111" name="card" size="20" className="form-control"/>
                         </div>

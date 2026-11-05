@@ -25,31 +25,37 @@ Looking for a perfect codebase generator for your Startup? Try [Flatlogic AI Web
    git clone https://github.com/flatlogic/sofia-react.git
    cd sofia-react
    ```
-2. **Install dependencies**  
-   ```bash
-   yarn install  # Or npm install
+2. **Install dependencies with Node.js 22.12 or newer**
+   ```sh
+   npm ci --legacy-peer-deps
    ```
-3. **Run the app**  
-   ```bash
-   yarn start
-   ```
-   Navigate to http://localhost:3000/.
+   The explicit flag retains the existing React 18/Router 5 and legacy form-library peer constraints; no global bypass is configured. `package-lock.json` is the canonical dependency graph. The superseded Yarn lock is removed after clean installation and full runtime/development audit verification.
 
-4. **Backend Support**  
-   ```bash
-   yarn start:backend
+3. **Run the app**
+   ```sh
+   npm start
+   npm run start:backend
    ```
+   Vite serves http://127.0.0.1:5173. The first command keeps demo mode, and the second enables the existing backend integration and endpoints in `src/config.js`.
 
-5. **Build for production**  
-   ```bash
-   yarn build
+4. **Build and verify**
+   ```sh
+   npm run build
+   npm run preview
+   npm audit
+   npm test
+   PLAYWRIGHT_DEV=1 npm test
    ```
+   The production build is written to `build/`. Tests use locally installed Google Chrome and API fixtures in production preview and backend development mode. They check authentication, user-table search/sort/pagination/view, Markdown tables/task lists with sanitized HTML preview, actual chart output, calendar, vector map and logout, and fail on browser page errors. JWT unit regressions preserve the old decoder's malformed-token/null contract. Live backend/OAuth/external Google Maps are not exercised. Existing React/MUI/Sass component/deprecation warnings remain.
 
-6. **Docker Support**  
-   ```bash
+   React 18, Router 5, Redux, forms, SCSS and assets are retained. The vulnerable CRA build graph is replaced by Vite. Unmaintained Showdown is replaced with markdown-it and task-list support, with DOMPurify applied at the preview boundary. ApexCharts 3 keeps its compatible exact React adapter 1.5.0, and Highcharts uses its current color factory.
+
+5. **Docker support**
+   ```sh
    docker build -t sofia-react .
    docker run -p 3000:3000 -d sofia-react
    ```
+   The development container uses Node 22, the npm lockfile and backend mode, and binds its Vite server to port 3000. Docker execution requires a locally installed Docker engine.
 
 ---
 
