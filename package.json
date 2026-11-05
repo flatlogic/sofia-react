@@ -107,6 +107,8 @@
     "vite": "^8.0.0"
   },
   "overrides": {
-    "underscore": "^1.13.7"
+    "react-bootstrap-table-next": {
+      "underscore": "^1.13.8"
+    }
   }
 }
