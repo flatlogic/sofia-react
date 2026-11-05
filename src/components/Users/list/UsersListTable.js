@@ -89,7 +89,7 @@ const UsersListTable = (props) => {
     {
       dataField: "avatars",
       sort: true,
-      formatter: dataFormat.imageFormatter,
+      formatter: (cell, row, rowIndex) => dataFormat.imageFormatter(cell, row, null, rowIndex),
       text: "Avatar",
     },
     {

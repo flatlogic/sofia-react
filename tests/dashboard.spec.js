@@ -4,9 +4,10 @@ test('backend login, user controls, markdown preview, charts, calendar, vector m
   test.setTimeout(90000);
   const errors = [];
   page.on('pageerror', error => { errors.push(error.message); console.error(error); });
-  const user = { id: 'test-admin', firstName: 'Ada', lastName: 'Lovelace', email: 'admin@example.test', role: 'admin', disabled: false, avatars: [], avatar: [], phoneNumber: '5551234567' };
-  let users = [user, ...Array.from({ length: 11 }, (_, i) => ({ ...user, id: `user-${i}`, firstName: `User ${String(i).padStart(2, '0')}`, email: `user${i}@example.test`, role: 'user' }))];
+  const user = { id: 'test-admin', firstName: 'Ada', lastName: 'Lovelace', email: 'admin@example.test', role: 'admin', disabled: false, avatars: [{ publicUrl: '/missing-user-avatar.png' }], avatar: [], phoneNumber: '5551234567' };
+  let users = [user, ...Array.from({ length: 11 }, (_, i) => ({ ...user, id: `user-${i}`, firstName: `User ${String(i).padStart(2, '0')}`, email: `user${i}@example.test`, role: 'user', avatars: [] }))];
   const token = [Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url'), Buffer.from(JSON.stringify({ user, exp: Math.floor(Date.now()/1000)+3600 })).toString('base64url'), 'fixture-signature'].join('.');
+  await page.route('**/missing-user-avatar.png', route => route.fulfill({ status: 404, body: 'Missing test avatar' }));
   await page.route(url => url.pathname.startsWith('/api/'), async route => {
     const request = route.request(); const path = new URL(request.url()).pathname;
     let data;
@@ -21,8 +22,11 @@ test('backend login, user controls, markdown preview, charts, calendar, vector m
   await page.getByRole('button', { name: 'Login', exact: true }).click();
   await expect(page).toHaveURL(/#\/template\/dashboard$/);
   await expect(page.locator('.apexcharts-svg').first()).toBeVisible();
-  await page.goto('/#/admin/users');
+  await page.goto('/#/admin/users', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('table')).toContainText(user.email);
+  const avatar = page.locator('tbody tr').first().getByRole('img', { name: 'avatar', exact: true });
+  await expect.poll(() => avatar.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
+  await expect(avatar).not.toHaveAttribute('src', /missing-user-avatar/);
   await page.getByLabel('Search users').fill('Ada');
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await page.getByRole('button', { name: 'View', exact: true }).click();
