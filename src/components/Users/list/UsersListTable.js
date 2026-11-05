@@ -14,18 +14,18 @@ import {
 
 import BootstrapTable from "react-bootstrap-table-next";
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 
 import Widget from "../../Widget/Widget";
 
 import s from "../Users.module.scss";
 
-const { SearchBar } = Search;
+
 
 const UsersListTable = (props) => {
   
   const { rows, dispatch, loading, idToDelete, modalOpen } = props;
+  const [search, setSearch] = useState('');
   const [tableWidth, setTableWidth] = useState(window.innerWidth);
 
   console.log("ROWS", rows)
@@ -134,24 +134,23 @@ const UsersListTable = (props) => {
     <div>
       <Widget className="widget-p-md">
         <p className="headline-2">Users</p>
-        <ToolkitProvider
-          columns={columns}
-          data={rows}
+        <input
+          className="form-control react-bootstrap-table-search-input my-3"
+          aria-label="Search users"
+          placeholder="Search"
+          value={search}
+          onChange={event => setSearch(event.target.value)}
+        />
+        <BootstrapTable
           keyField="id"
-          search
-        >
-          { props => (
-            <React.Fragment>
-              <SearchBar className="react-bootstrap-table-search-input my-3" { ...props.searchProps } />
-              <BootstrapTable
-                bordered={false}
-                classes={`table-striped table-hover mt-4 ${tableWidth < 1150 ? 'table-responsive' : ''}`}
-                pagination={paginationFactory()}
-                { ...props.baseProps }
-              />
-            </React.Fragment>
-          )}
-        </ToolkitProvider>
+          columns={columns}
+          data={rows.filter(row => Object.values(row).some(value =>
+            typeof value !== 'object' && String(value).toLowerCase().includes(search.toLowerCase())
+          ))}
+          bordered={false}
+          classes={`table-striped table-hover mt-4 ${tableWidth < 1150 ? 'table-responsive' : ''}`}
+          pagination={paginationFactory()}
+        />
       </Widget>
       <Modal size="sm" isOpen={props.modalOpen} toggle={() => closeModal()}>
         <ModalHeader toggle={() => closeModal()}>Confirm delete</ModalHeader>

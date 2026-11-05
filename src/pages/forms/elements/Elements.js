@@ -18,7 +18,9 @@ import {
 } from "reactstrap";
 import TextareaAutosize from "react-textarea-autosize";
 import ReactMde from "react-mde";
-import * as Showdown from "showdown";
+import MarkdownIt from "markdown-it";
+import taskLists from "markdown-it-task-lists";
+import DOMPurify from "dompurify";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import ColorPicker from 'rc-color-picker';
@@ -35,12 +37,7 @@ import s from "./Elements.module.scss";
 
 export default function Elements() {
 
-  const converter = new Showdown.Converter({
-    tables: true,
-    simplifiedAutoLink: true,
-    strikethrough: true,
-    tasklists: true
-  });
+  const converter = new MarkdownIt({ html: true, linkify: true }).use(taskLists);
 
   const state = {
     selectDefaultData: [
@@ -547,7 +544,7 @@ export default function Elements() {
                         selectedTab={selectedMarkdownTab}
                         onTabChange={setSelectedMarkdownTab}
                         generateMarkdownPreview={(markdown) =>
-                          Promise.resolve(converter.makeHtml(markdown))
+                          Promise.resolve(DOMPurify.sanitize(converter.render(markdown)))
                         }
                         childProps={{
                           writeButton: {
