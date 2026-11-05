@@ -57,6 +57,15 @@ test('backend login, user controls, markdown preview, charts, calendar, vector m
   await page.goto('/#/template/maps/vector');
   await expect(page.locator('#chartdiv svg').first()).toBeVisible();
   await expect(page.locator('#chartdiv svg path').nth(20)).toBeVisible();
+  // amCharts animates opacity on SVG ancestors; wait for actual colored countries.
+  await expect.poll(() => page.locator('#chartdiv svg path').evaluateAll(paths => paths.filter(path => {
+    const color = getComputedStyle(path).fill;
+    let opacity = 1;
+    for (let element = path; element; element = element.parentElement) {
+      opacity *= Number(getComputedStyle(element).opacity);
+    }
+    return (path.getAttribute('d') || '').length > 150 && color !== 'none' && color !== 'rgb(255, 255, 255)' && opacity > 0.95;
+  }).length), { timeout: 10000 }).toBeGreaterThan(20);
   await page.screenshot({ path: 'test-results/sofia-map.png' });
   await page.getByText('Christina Carey', { exact: true }).click();
   await page.getByRole('button', { name: /Logout/ }).click();
